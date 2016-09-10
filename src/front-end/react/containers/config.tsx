@@ -8,8 +8,7 @@ import {
   Select,
   String,
 } from '../components';
-import { flex, flexCol } from '../../styles';
-import { configInterfaces } from '../../../engine/configs/config-interfaces';
+import { configInterfaces } from '../../../engine';
 
 function mapStateToProps(state) {
   return {

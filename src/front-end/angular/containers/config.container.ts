@@ -1,18 +1,12 @@
 import { nextConfigProp } from '../../actions/game.actions';
 import { Store } from '../opaque-tokens';
-import { configInterfaces } from '../../../engine/configs/config-interfaces';
+import { configInterfaces } from '../../../engine';
 
 import {
   ChangeDetectionStrategy,
   Component,
   Inject,
 } from '@angular/core';
-
-import {
-  Button,
-  Number,
-  Select,
-} from '../components';
 
 import { select } from 'ng2-redux';
 import { Observable } from 'rxjs/Rx';

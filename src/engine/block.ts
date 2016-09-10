@@ -1,16 +1,12 @@
 /**
  * shortcut for importing blocks from arrays
  */
-import {
-  Block,
-  BlockDescription,
-  Direction,
-  Matrix,
-} from '../interfaces';
+import { Direction } from '../interfaces';
+import { Matrix } from './matrix';
 
 import {
-  rotateLeft as rotateMatrixLeft,
-  rotateRight as rotateMatrixRight,
+  rotateMatrixLeft,
+  rotateMatrixRight,
 } from './matrix';
 
 import {
@@ -18,6 +14,26 @@ import {
   intMidCeil,
   intMidFloor,
 } from '../util';
+
+/**
+ * x/y refer to board positions (if the block is active) always measured from
+ * the block's top left, even after rotation
+ */
+export interface Block {
+  centreX: number;
+  centreY: number;
+  desc: Matrix;
+  descUp: Matrix;
+  descDown: Matrix;
+  descLeft: Matrix;
+  descRight: Matrix;
+  height: number;
+  name: string;
+  width: number;
+  orientation: Direction;
+  x: number;
+  y: number;
+}
 
 export function columnsFromBlock(block: Block) {
   const cols = [];

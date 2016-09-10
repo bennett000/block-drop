@@ -1,4 +1,5 @@
-import { Block, GameConfig, TypedArray } from '../../interfaces';
+import { TypedArray } from '../../interfaces';
+import { Block, GameConfig } from '../../engine';
 import {
   CHANGE_NEXT_CONFIG,
   PAUSE,

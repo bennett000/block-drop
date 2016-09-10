@@ -1,5 +1,5 @@
 import { CHANGE_NEXT_CONFIG, REPLACE_NEXT_CONFIG } from '../constants';
-import { GameConfig } from '../../interfaces';
+import { GameConfig } from '../../engine';
 import { deepFreeze } from '../../util';
 
 const INIT = deepFreeze({

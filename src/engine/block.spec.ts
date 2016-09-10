@@ -1,3 +1,4 @@
+import { Direction } from '../interfaces';
 import {
   columnsFromBlock,
   createBlock,
@@ -5,10 +6,6 @@ import {
   rotateLeft,
   rotateRight,
 } from './block';
-
-import {
-  Direction
-} from '../interfaces';
 
 describe('block functions', () => {
   describe('columnsFromBlock', () => {

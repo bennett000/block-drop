@@ -1,19 +1,13 @@
 /**
  * Random helper functions
  */
-import {
-  SeedRandom, 
-} from '../interfaces';
-
-import {
-  makeCollection,
-} from './function-collection';
+import { makeCollection } from './function-collection';
 
 const seedRandom = require('seedrandom');
 
 export const defaultRandom = seedRandom.xor4096;
 
-export const functions = makeCollection<(seed: string) => () => number>(
+export const functionsRandom = makeCollection<(seed: string) => () => number>(
   {
     alea: seedRandom.alea,
     quick: seedRandom.quick,

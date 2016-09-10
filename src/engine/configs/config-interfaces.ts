@@ -1,10 +1,5 @@
-import {
-  functionsDetectClear,
-} from '../board';
-
-import {
-  functions as functionsRandom,
-} from '../random';
+import { functionsDetectClear } from '../board';
+import { functionsRandom } from '../random';
 
 import {
   deepFreeze,

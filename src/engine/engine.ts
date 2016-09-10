@@ -22,18 +22,19 @@ import { DEFAULT_CONFIG_1 } from './configs/default-config';
 
 import { createEventEmitter } from '../event';
 
+import { Block } from './block';
+import { Board } from './board';
+
 import {
-  Block,
-  Board,
   GameConfig,
   NextBlockConfig,
-} from '../interfaces';
+} from './config';
 
 import '../license';
 
 import {
   between,
-  functions as randomFunctions,
+  functionsRandom,
   randomSet,
 } from './random';
 
@@ -320,7 +321,7 @@ export function createNextBlock(c: NextBlockConfig,
 
   const blocks = c.blockDescriptions
     .map((el) => c.createBlock(el.desc, 0, 0, el.name));
-  const rand = randomFunctions.get(c.seedRandom)(c.seed);
+  const rand = functionsRandom.get(c.seedRandom)(c.seed);
   const spawn: (block: Block) => Block = partial(c.spawn, c.width, c.height);
   
   const randomBlock: () => Block = c.randomMethod === 'random' ?

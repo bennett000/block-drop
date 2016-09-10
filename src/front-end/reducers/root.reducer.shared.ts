@@ -1,6 +1,6 @@
 import { app, IAppState } from './app.reducer';
 import { game, IGameState } from './game.reducer';
-import { GameConfig } from '../../interfaces';
+import { GameConfig } from '../../engine';
 import { nextConfig } from './next-config.reducer';
 
 export interface IState {

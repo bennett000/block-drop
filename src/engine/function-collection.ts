@@ -1,5 +1,11 @@
-import { FunctionsCollection } from '../interfaces';
 import { isFunction, partial } from '../util';
+
+export interface FunctionsCollection<T extends Function> {
+  default(): T;
+  get(name: string): T;
+  list(): string;
+  register(name: string, func: T): void;
+}
 
 export function getFunctionFrom(defaultFn,
                                 collection: Object, fnName?: string) {

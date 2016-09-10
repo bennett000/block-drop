@@ -1,10 +1,7 @@
 import {
   Block,
-} from '../../interfaces';
-
-import {
   GameConfig,
-} from '../../interfaces';
+} from '../../engine';
 
 import {
   deepFreeze,

@@ -1,15 +1,12 @@
-import { 
+import {
+  Block,
   up, 
 } from './block';
 
 import {
+  Board,
   canMoveDown,
 } from './board';
-
-import { 
-  Block,
-  Board,
-} from '../interfaces';
 
 import { 
   intMidFloor,

@@ -1,21 +1,21 @@
 import {
-  rotateLeft,
-  rotateRight,
+  rotateMatrixLeft,
+  rotateMatrixRight,
   transpose,
 } from './matrix';
 
 describe('matrix functions', () => {
   describe('rotateLeft function', () => {
     it('should handle an empty array case', () => {
-      expect(rotateLeft([])).toEqual([]);
+      expect(rotateMatrixLeft([])).toEqual([]);
     });
     
     it('should handle an array of empty array case', () => {
-      expect(rotateLeft([[], []])).toEqual([]);
+      expect(rotateMatrixLeft([[], []])).toEqual([]);
     });
 
     it('should rotate a simple 3x2 array', () => {
-      expect(rotateLeft([
+      expect(rotateMatrixLeft([
         [0, 1],
         [1, 0],
         [0, 1],
@@ -26,7 +26,7 @@ describe('matrix functions', () => {
     });
     
     it('two rotations should produce the inverse of the original', () => {
-      expect(rotateLeft(rotateLeft([
+      expect(rotateMatrixLeft(rotateMatrixLeft([
         [0, 1],
         [1, 0],
         [0, 1],
@@ -43,23 +43,23 @@ describe('matrix functions', () => {
         [1, 0],
         [0, 1],
       ];
-      const rotated = rotateLeft(matrix);
+      const rotated = rotateMatrixLeft(matrix);
       expect(rotated).not.toBe(matrix);
       expect(rotated[0]).not.toBe(matrix[0]);
     });
   });
 
-  describe('rotateRight function', () => {
+  describe('rotateMatrixRight function', () => {
     it('should handle an empty array case', () => {
-      expect(rotateRight([])).toEqual([]);
+      expect(rotateMatrixRight([])).toEqual([]);
     });
 
     it('should handle an array of empty array case', () => {
-      expect(rotateRight([[], []])).toEqual([]);
+      expect(rotateMatrixRight([[], []])).toEqual([]);
     });
 
     it('should rotate a simple 3x2 array', () => {
-      expect(rotateRight([
+      expect(rotateMatrixRight([
         [0, 1],
         [1, 0],
         [0, 1],
@@ -70,7 +70,7 @@ describe('matrix functions', () => {
     });
     
     it('two rotations should produce the inverse of the original', () => {
-      expect(rotateRight(rotateRight([
+      expect(rotateMatrixRight(rotateMatrixRight([
         [0, 1],
         [1, 0],
         [0, 1],
@@ -87,7 +87,7 @@ describe('matrix functions', () => {
         [1, 0],
         [0, 1],
       ];
-      const rotated = rotateRight(matrix);
+      const rotated = rotateMatrixRight(matrix);
       expect(rotated).not.toBe(matrix);
       expect(rotated[0]).not.toBe(matrix[0]);
     });

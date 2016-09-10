@@ -11,13 +11,21 @@ import { makeCollection } from './function-collection';
 
 import {
   Block,
-  Board,
-  Board1,
-} from '../interfaces';
+} from './block';
 
 import {
   throwOutOfBounds,
 } from '../util';
+
+export interface Board {
+  width: number;
+  height: number;
+  desc: Uint8Array;
+}
+
+export interface Board1 extends Board {
+  descBuffer: Uint8Array;
+}
 
 export const functionsDetectClear = makeCollection({
   detectAndClear1,

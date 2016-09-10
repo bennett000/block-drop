@@ -1,14 +1,12 @@
 /**
  * Naive matrix functions
  */
-import {
-  Matrix,
-} from '../interfaces';
+export type Matrix = Array<number[]>;
 
 /**
  * Non destructive rotateLeft function
  */
-export function rotateLeft(m: Matrix): Matrix {
+export function rotateMatrixLeft(m: Matrix): Matrix {
   if (m.length === 0) {
     return [];
   }
@@ -32,7 +30,7 @@ export function rotateLeft(m: Matrix): Matrix {
 /**
  * Non destructive rotateRight function
  */
-export function rotateRight(m: Matrix): Matrix {
+export function rotateMatrixRight(m: Matrix): Matrix {
   if (m.length === 0) {
     return [];
   }
