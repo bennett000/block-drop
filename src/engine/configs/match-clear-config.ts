@@ -7,6 +7,10 @@ import {
 } from '../block';
 
 import {
+  canMoveDown,
+  canMoveUp,
+  canMoveLeft,
+  canMoveRight,
   canRotateLeft1,
   canRotateRight1,
   createBoard1,
@@ -44,11 +48,17 @@ export const DEFAULT_CONFIG_1 = deepFreeze({
   width: 11,
   height: 25,
   blockDescriptions,
+  canMoveUp: () => true,
+  canMoveDown,
+  canMoveLeft,
+  canMoveRight,
   canRotateLeft: canRotateLeft1,
   canRotateRight: canRotateRight1,
   checkForLoss: checkForLoss1,
   createBoard: createBoard1,
   createBlock: createBlock,
+  dropOnUp: true,
+  enableShadow: true,
   forceBufferUpdateOnClear: true,
   gameOver: gameOver1,
   detectAndClear: 'detectAndClear2',
@@ -56,7 +66,11 @@ export const DEFAULT_CONFIG_1 = deepFreeze({
   randomMethod: 'randomFromSet',
   seedRandom: 'xor4096',
   spawn: spawn1,
-  speed: 1000,
+  baseLevelScore: 1000,
+  tileScoreMultiplier: 10,
+  nextLevelMultiplier: 1.61803398875,
+  speed: 618,
+  speedMultiplier: 0.61803398875,
   tick: tick1,
 });
 

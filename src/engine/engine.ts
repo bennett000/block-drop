@@ -14,6 +14,7 @@ import {
   canMoveUp,
   canMoveLeft,
   canMoveRight,
+  DC2MAX,
   functionsDetectClear,
   removeBlock,
 } from './board';
@@ -73,6 +74,7 @@ export function create1(config: GameConfig = {}) {
     ],
     gameOvers: 0,
     history: [],
+    isEnded: false,
     pauses: [],
     rowsCleared: 0,
     tick: 0,
@@ -88,19 +90,35 @@ export function create1(config: GameConfig = {}) {
   const boardBlockFn = partial<(f: Function) => Function>(paramsToFn,
     [getBoard, getActivePiece]);
   const updateActiveBlock = partial<(fn: Function) => void>(updateBlock,
-    getBoard, getActivePiece, getBuffer);
-  const bCanMoveDown = boardBlockFn<() => boolean>(canMoveDown);
-  const bCanMoveUp = boardBlockFn<() => boolean>(canMoveUp);
-  const bCanMoveLeft = boardBlockFn<() => boolean>(canMoveLeft);
-  const bCanMoveRight = boardBlockFn<() => boolean>(canMoveRight);
+    getBoard, getActivePiece, getBuffer, c.enableShadow);
+  const bCanMoveDown = boardBlockFn<() => boolean>(c.canMoveDown);
+  const bCanMoveUp = boardBlockFn<() => boolean>(c.canMoveUp);
+  const bCanMoveLeft = boardBlockFn<() => boolean>(c.canMoveLeft);
+  const bCanMoveRight = boardBlockFn<() => boolean>(c.canMoveRight);
   const bCanRotateLeft = boardBlockFn<() => boolean>(c.canRotateLeft);
   const bCanRotateRight = boardBlockFn<() => boolean>(c.canRotateRight);
+  const bGameOver = () => {
+    gameOver(c.debug, getBoard, getBuffer,
+      writableState, nextBlock, events.emit);
+    clearInterval(writableState.timer);
+    writableState.timer = setInterval(interval, deriveMultiple(
+      writableState.games[0].level, c.speedMultiplier, c.speed
+    ));
+  };
   const bRotateLeft = blockFn(rotateLeft);
   const bRotateRight = blockFn(rotateRight);
   const bMove: (axis: 'x' | 'y', quantity?: number) => any = blockFn(move);
   const moveDown = partial(bMove, 'y', 1);
   const moveLeft = partial(bMove, 'x', -1);
-  const moveUp = partial(bMove, 'y', -1);
+  const moveUp = () => {
+    while (c.canMoveDown(getBoard(), getActivePiece())) {
+      moveDown();
+    }
+    if (state) {
+      writableState.history.push({ tick: state.tick, control: 'move-up' });
+    }
+    events.emit('redraw');
+  };
   const moveRight = partial(bMove, 'x', 1);
   const commitBlock = boardBlockFn<() => void>(addBlock);
   const checkForLoss = boardBlockFn<() => void>(c.checkForLoss);
@@ -174,13 +192,7 @@ export function create1(config: GameConfig = {}) {
         moveUp: {
           configurable: false,
           writable: false,
-          value: partial<() => void>(tryFnRedraw,
-            bCanMoveUp,
-            partial(updateActiveBlock, moveUp),
-            events.emit,
-            writableState,
-            'moveUp'
-          ),
+          value: moveUp,
         },
         rotateLeft: {
           configurable: false,
@@ -205,15 +217,32 @@ export function create1(config: GameConfig = {}) {
         },
       }),
     },
+    // ends the game, stateful, only happens if there is an active game
+    endGame: {
+      configurable: false,
+      writable: false,
+      value: () => {
+        if (writableState.isEnded) {
+          return;
+        }
+        clearInterval(writableState.timer);
+        writableState.isEnded = true;
+      },
+    },
+    // resets the game
     gameOver: {
       configurable: false,
       writable: false,
-      value: partial(gameOver, c.debug, getBoard, getBuffer, writableState, 
-        nextBlock, events.emit),
+      value: bGameOver,
     },
     gamesOvers: {
       configurable: false,
       get: () => writableState.gameOvers,
+      set: noop,
+    },
+    isStopped: {
+      configurable: false,
+      get: () => writableState.isEnded,
       set: noop,
     },
     on: {
@@ -252,9 +281,40 @@ export function create1(config: GameConfig = {}) {
       writable: false,
       value: preview,
     },
+    progress: {
+      configurable: false,
+      get: () => {
+        const game = writableState.games[0];
+        const total = game.tilesCleared - game.tilesClearedPrev;
+        return total / game.nextLevelThreshold;
+      },
+      set: noop,
+    },
     rowsCleared: {
       configurable: false,
       get: () => writableState.games[0].rowsCleared,
+      set: noop,
+    },
+    score: {
+      configurable: false,
+      get: () => writableState.games[0].score,
+      set: noop,
+    },
+    startGame: {
+      configurable: false,
+      value: () => {
+        if (writableState.isEnded) {
+          writableState.isEnded = false;
+          bGameOver();
+          writableState.timer = setInterval(interval, deriveMultiple(
+            writableState.games[0].level, c.speedMultiplier, c.speed
+          ));
+        }
+      },
+    },
+    level: {
+      configurable: false,
+      get: () => writableState.games[0].level,
       set: noop,
     },
     state: {
@@ -270,13 +330,45 @@ export function create1(config: GameConfig = {}) {
     if (c.debug) {
       debugBlock('New Piece:', getActivePiece());
     }
-    addBlock(board, getActivePiece(), buffer);
+    addBlock(board, getActivePiece(), buffer, c.enableShadow);
   }
   
   function bClearCheck() {
-    writableState.games[0].rowsCleared +=
-      clearCheck(engine, board, partial(detectAndClear, board),
+    const cleared = clearCheck(engine, board, partial(detectAndClear, board),
         c.forceBufferUpdateOnClear);
+
+    writableState.games[0].rowsCleared += cleared;
+    writableState.games[0].tilesCleared += cleared;
+    if (cleared) {
+      const overflow = cleared - DC2MAX;
+      writableState.games[0].score += overflow * writableState.games[0].level *
+        c.tileScoreMultiplier;
+    }
+  }
+
+  function interval() {
+    const game = writableState.games[0];
+
+    if (game.levelPrev !== game.level) {
+      game.rowsClearedPrev = game.rowsCleared;
+      game.tilesClearedPrev = game.tilesClearedPrev;
+      game.levelPrev = game.level;
+    }
+
+    c.tick(engine,
+      board,
+      (axis: 'x' | 'y', quantity: number) => {
+        updateActiveBlock(() => bMove(axis, quantity));
+      },
+      newBlock,
+      bClearCheck,
+      commitBlock,
+      checkForLoss,
+      c.gameOver);
+
+    score();
+
+    writableState.tick += 1;
   }
 
   function startTick() {
@@ -284,23 +376,32 @@ export function create1(config: GameConfig = {}) {
       console.warn('startTick called and timer exists!');
       return;
     }
-    writableState.timer = setInterval(() => {
-      c.tick(engine,
-        board,
-        (axis: 'x' | 'y', quantity: number) => {
-          updateActiveBlock(() => bMove(axis, quantity));
-        },
-        newBlock,
-        bClearCheck,
-        commitBlock,
-        checkForLoss,
-        c.gameOver);
-      writableState.tick += 1;
-    }, c.speed);
+
+    writableState.timer = setInterval(interval, deriveMultiple(
+      writableState.games[0].level, c.speedMultiplier, c.speed
+    ));
+  }
+
+  /** Dirty side effect for demo, putting it here to not clutter above */
+  function score() {
+    const game = writableState.games[0];
+    const tilesClearedSinceLevel = game.tilesCleared - game.tilesClearedPrev;
+
+    if (tilesClearedSinceLevel > game.nextLevelThreshold) {
+      game.score += c.baseLevelScore;
+      game.level += 1;
+      game.score += (tilesClearedSinceLevel - game.level) * 
+        c.tileScoreMultiplier * game.level;
+      game.nextLevelThreshold *= c.nextLevelMultiplier;
+      clearInterval(writableState.timer);
+      writableState.timer = setInterval(interval, deriveMultiple(
+        game.level, c.speedMultiplier, c.speed
+      ));
+    }
   }
 
   // go
-  addBlock(board, getActivePiece(), buffer);
+  addBlock(board, getActivePiece(), buffer, c.enableShadow);
   startTick();
 
   return engine;
@@ -310,8 +411,14 @@ function createGame1(nextBlock) {
   return {
     activePieceHistory: [],
     activePiece: nextBlock(), 
+    level: 1,
+    levelPrev: 1,
+    nextLevelThreshold: 45,
     rowsCleared: 0,
+    rowsClearedPrev: 0,
+    score: 0,
     tilesCleared: 0, 
+    tilesClearedPrev: 0,
   }; 
 }
 
@@ -347,8 +454,9 @@ export function clearCheck(engine: { rowsCleared: number, buffer: Uint8Array },
                            detectAndClear: () => number,
                            forceBufferCopy: boolean) {
   const cleared = detectAndClear();
-  engine.rowsCleared += cleared;
+
   if (cleared || forceBufferCopy) { copyBuffer(board.desc, engine.buffer); }
+
   return cleared;
 }
 
@@ -394,13 +502,15 @@ export function gameOver(isDebug: boolean,
 export function updateBlock(getBoard: () => Board,
                             getBlock: () => Block,
                             getBuffer: () => Uint8Array,
-                            fn: () => any) {
+                            enableShadow: boolean,
+                            fn: () => any,
+                          ) {
   const block = getBlock();
   const board = getBoard();
   const buffer = getBuffer();
-  removeBlock(board, block, buffer);
+  removeBlock(board, block, buffer, enableShadow);
   fn();
-  addBlock(board, block, buffer);
+  addBlock(board, block, buffer, enableShadow);
 }
 
 export function tryFnRedraw(canFn: () => boolean,
@@ -431,4 +541,11 @@ export function forceValidateConfig(defaults: GameConfig,
   config.seed = config.seed || Date.now();
   
   return config;
+}
+
+function deriveMultiple(level: number, multiplier: number, value: number) {
+  if (level <= 1) {
+    return value * multiplier;
+  }
+  return deriveMultiple(level - 1, multiplier, value) * multiplier;
 }

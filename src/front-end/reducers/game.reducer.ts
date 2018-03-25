@@ -23,6 +23,10 @@ import {
   UPDATE_ACTIVE_PIECE,
   UPDATE_PREVIEW,
   UPDATE_BUFFER,
+  UPDATE_LEVEL,
+  UPDATE_SCORE,
+  UPDATE_LEVEL_PROGRESS,
+  UPDATE_GAME_STATUS,
 } from '../constants';
 import { O_EMPTY_BLOCK } from '../constants';
 import { mergeProp, partial } from '../../util';
@@ -40,8 +44,12 @@ export interface IGameState {
     x: number, y: number, direction: 'row' | 'column'
   };
   isPaused: boolean;
+  isStopped: boolean;
   lastEvent: { keyCode: number };
+  level: number;
+  levelProgress: number;
   preview: Block[];
+  score: number;
   trimCols: number;
   trimRows: number;
 }
@@ -54,8 +62,12 @@ const INIT: IGameState = deepFreeze({
   }),
   currentGameViewportDimensions: { x: 0, y: 0, direction: 'row' },
   isPaused: false,
+  isStopped: false,
   lastEvent: { keyCode: 0 },
+  level: 0,
+  levelProgress: 0,
   preview: [],
+  score: 0,
   trimCols: 2,
   trimRows: 0,
 });
@@ -87,6 +99,18 @@ export function game(state = INIT, { payload, type }) {
 
     case UPDATE_PREVIEW:
       return bMergeProp('preview');
+
+    case UPDATE_SCORE:
+      return bMergeProp('score');
+
+    case UPDATE_LEVEL:
+      return bMergeProp('level');
+
+    case UPDATE_LEVEL_PROGRESS:
+      return bMergeProp('levelProgress');
+
+    case UPDATE_GAME_STATUS:
+      return bMergeProp('isStopped');
 
     default:
       return state;

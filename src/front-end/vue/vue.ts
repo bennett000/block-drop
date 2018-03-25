@@ -3,15 +3,16 @@ import { EngineStore } from '../store/store';
 import { Resizer } from '../aspect-resizer';
 import '../../license';
 import { routes } from './routes';
-import { Nav } from './components';
 import { VUE_LOCATION_CHANGE } from './router-reducer';
 import Vue from 'vue';
-// Global styles
-import '../styles/index.css';
 
 const VUE = 'bd-root-vue';
+let appRef;
 
 export function mount(store: EngineStore, resizer: Resizer) {
+  if (appRef) {
+    return;
+  }
   const id = 'rando-' + Date.now().toString(32) + 
     Math.floor(Math.random() * 1000).toString(32);
   const el = window.document.createElement('div');
@@ -24,9 +25,8 @@ export function mount(store: EngineStore, resizer: Resizer) {
     state: store.getState(),
   };
 
-  const nav = Nav();
 
-  const app = new Vue({
+  appRef = new Vue({
     data,
     methods: {
       redraw() {
@@ -44,21 +44,8 @@ export function mount(store: EngineStore, resizer: Resizer) {
       const redraw = (this as any).redraw.bind(this);
       return h(
         'div',
-        {
-        },
+        {},
         [
-          h(nav, {
-            on: {
-              nav(path: string) {
-                store.dispatch({ type: VUE_LOCATION_CHANGE, payload: path });
-                window.history.pushState(null, name, '/' + path);
-                redraw();
-              },
-            },
-            props: {
-              routes: this.state.app.routes,
-            }
-          }),
           /** @todo determine why computed props are not in the generic --v */
           h(routeTo, {
             // class: {
@@ -67,10 +54,12 @@ export function mount(store: EngineStore, resizer: Resizer) {
             props: { 
               createGame: store.game.create,
               dispatch: store.dispatch.bind(store), 
+              done: store.game.stop.bind(store.game),
               gameControls: store.game.controls.bind(store.game),
               pause: store.game.pause,
               resizer, 
               resume: store.game.resume,
+              start: store.game.start.bind(store.game),
               state: this.state,
             },
           }),
@@ -85,6 +74,11 @@ export function mount(store: EngineStore, resizer: Resizer) {
 }
 
 export function unmount() {
+  if (!appRef) {
+    return;
+  }
+  appRef.$destroy();
   const el = window.document.getElementById(VUE);
   el.innerHTML = '';
+  appRef = null;
 }

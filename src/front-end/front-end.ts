@@ -12,12 +12,16 @@ import {
   changeMultiFramework,
 } from './actions/app.actions';
 import {
+  updateGameStatus,
+} from './actions/game.actions';
+import {
   EL_ROOT,
   EL_SPLASH,
   FRAMEWORK_DESCRIPTIONS,
   VERSION,
 } from './constants';
 import { init } from './aspect-resizer';
+import './register-service-worker';
 
 const store = create(rootReducer);
 const resizer = init(store);
@@ -69,6 +73,7 @@ const elements = FRAMEWORK_DESCRIPTIONS.reduce(
   Object.create(null)
 );
 
+let storeSub: Function = noop;
 let listeners: Function[] = [];
 let unmountCurrent = noop;
 hide(rootEl);
@@ -91,8 +96,20 @@ function hideAll() {
 }
 
 function mount() {
+  storeSub = store.subscribe(() => {
+    const state = store.getState();
+    if (state.game.isStopped) {
+      hideAll();
+      unmountCurrent();
+      unmountCurrent = noop;
+      unmount();
+      store.dispatch(updateGameStatus(false));
+    }
+  });
+
   rootEl.innerHTML = '';
-  FRAMEWORK_DESCRIPTIONS.forEach((fwDesc, i) => {
+  const buttons = FRAMEWORK_DESCRIPTIONS
+  .map((fwDesc, i) => {
     const button = document.createElement('input');
     button.type = 'button';
     button.value = fwDesc.name;
@@ -100,13 +117,16 @@ function mount() {
 
     function onClick() {
       const el = elements[fwDesc.id];
+      disableAllFwButtons(buttons);
       frameWorks[fwDesc.id]().then((fw) => {
+        store.game.start();
         hideAll();
         unmountCurrent();
         fw.mount(store, resizer);
         show(el);
         unmountCurrent = partial(fw.unmount, el);
         changeFramework(i);
+        enableAllFwButtons(buttons);
       });
     }
 
@@ -115,6 +135,7 @@ function mount() {
     });
 
     rootEl.appendChild(button);
+    return button;
   });
   hide(splashEl);
   show(rootEl);
@@ -127,4 +148,18 @@ function unmount() {
   listeners = [];
   rootEl.innerHTML = '';
   show(splashEl);
+  storeSub();
+  storeSub = noop;
+}
+
+function enableAllFwButtons(buttons: HTMLInputElement[]) {
+  buttons.forEach((el) => {
+    el.disabled = false;
+  });
+}
+
+function disableAllFwButtons(buttons: HTMLInputElement[]) {
+  buttons.forEach((el) => {
+    el.disabled = true;
+  });
 }
