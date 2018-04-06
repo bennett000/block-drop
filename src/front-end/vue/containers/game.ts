@@ -103,22 +103,22 @@ export const Game = () => {
         v-if="!(state.game.isPaused)"
         v-bind:preview="state.game.preview"
       />
-      <div>
+      <div class="tc">
         <bd-button
           v-if="state.game.isPaused" 
-          value="Resume"
+          value="RESUME"
           v-on:click="resume">
         </bd-button>
         <bd-button
           v-if="!(state.game.isPaused)" 
-          value="Pause"
+          value="PAUSE"
           v-on:click="pause">
         </bd-button>
+        <bd-button
+          value="DONE"
+          v-on:click="done">
+        </bd-button>
       </div>
-      <bd-button
-        value="Done"
-        v-on:click="done">
-      </bd-button>
     </div>
   </div>`,
   };

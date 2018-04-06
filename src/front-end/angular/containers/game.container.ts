@@ -40,23 +40,22 @@ import { Resizer } from '../../aspect-resizer';
         [preview]="preview"
       >
       </bd-next-pieces>
-      <bd-button 
-        *ngIf="(isPaused$ | async)" 
-        [value]="resumeLabel"
-        [onClick]="resume"
-      >
-      </bd-button>
-      <bd-button 
-        *ngIf="!(isPaused$ | async)" 
-        [value]="pauseLabel"
-        [onClick]="pause"
-      >
-      </bd-button>
-      <bd-button
-        value="Done"
-        [onClick]="done"
-      >
-      </bd-button>
+      <div class="tc">
+        <bd-button 
+          *ngIf="(isPaused$ | async)" 
+          [value]="resumeLabel"
+          [onClick]="resume">
+        </bd-button>
+        <bd-button 
+          *ngIf="!(isPaused$ | async)" 
+          [value]="pauseLabel"
+          [onClick]="pause">
+        </bd-button>
+        <bd-button
+          value="DONE"
+          [onClick]="done">
+        </bd-button>
+      </div>
     </div>
 `,
 })
@@ -72,10 +71,10 @@ export class Game implements AfterViewInit, OnInit, OnDestroy {
   private deRegister: Function[] = [];
   private pause: Function;
   private done: Function;
-  private pauseLabel = 'Pause';
+  private pauseLabel = 'PAUSE';
   private preview: { name: string, cols: number[][]}[] = [];
   private resume: Function;
-  private resumeLabel = 'Resume';
+  private resumeLabel = 'RESUME';
   private styles = {};
 
   constructor(@Inject(Store) private store: EngineStore,
