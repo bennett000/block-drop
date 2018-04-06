@@ -75,14 +75,24 @@ export interface NextBlockConfig extends MapBaseConfig {
 export interface GameConfig extends NextBlockConfig {
   board?: Uint8Array;
   debug?: boolean;
+  canMoveUp?: (board: Board, block: Block) => boolean;
+  canMoveDown?: (board: Board, block: Block) => boolean;
+  canMoveLeft?: (board: Board, block: Block) => boolean;
+  canMoveRight?: (board: Board, block: Block) => boolean;
   canRotateLeft?: (board: Board, block: Block) => boolean;
   canRotateRight?: (board: Board, block: Block) => boolean;
   checkForLoss?: (board: Board, block: Block) => boolean;
   createBoard?: (width: number, height: number) => Board;
   detectAndClear?: string;
+  dropOnUp?: boolean;
+  enableShadow?: boolean;
   forceBufferUpdateOnClear?: boolean;
   name?: string;
+  baseLevelScore?: number;
+  tileScoreMultiplier?: number;
+  nextLevelMultiplier?: number;
   speed?: number;
+  speedMultiplier?: number;
   tick?: (engine, 
           board: Board, 
           moveBlock: (axis: 'x' | 'y', magnitude: number) => any,

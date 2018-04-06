@@ -29,30 +29,33 @@ import { Resizer } from '../../aspect-resizer';
   selector: 'bd-game',
   template: `
     <board *ngIf="!(isPaused$ | async)"
-    class="${board}" 
-    [board]="(board$ | async)"
-    [width]="boardWidth$ | async"
-    [ngStyle]="styles ? styles : styles"
+      [board]="(board$ | async)"
+      [level]="level$ | async"
+      [width]="boardWidth$ | async"
+      [styles]="styles"
     ></board> 
-    <div class="${previewDebug}">
-      <bd-button 
-      *ngIf="(isPaused$ | async)" 
-      [value]="resumeLabel"
-      [onClick]="resume">
-      </bd-button>
-      <bd-button 
-      *ngIf="!(isPaused$ | async)" 
-      [value]="pauseLabel"
-      [onClick]="pause">
-      </bd-button>
+    <div class="w5">
+      <score [score]="score$ | async"></score>
       <bd-next-pieces *ngIf="!(isPaused$ | async)"
-      class="${flexShrink} ${flexCol}" 
-      [preview]="preview">
+        [preview]="preview"
+      >
       </bd-next-pieces>
-      <bd-debug 
-      class="${flexGrowShrink}" 
-      [keyCode]="(lastEvent$ | async).keyCode">
-      </bd-debug>
+      <div class="tc">
+        <bd-button 
+          *ngIf="(isPaused$ | async)" 
+          [value]="resumeLabel"
+          [onClick]="resume">
+        </bd-button>
+        <bd-button 
+          *ngIf="!(isPaused$ | async)" 
+          [value]="pauseLabel"
+          [onClick]="pause">
+        </bd-button>
+        <bd-button
+          value="DONE"
+          [onClick]="done">
+        </bd-button>
+      </div>
     </div>
 `,
 })
@@ -62,13 +65,16 @@ export class Game implements AfterViewInit, OnInit, OnDestroy {
     (s) => recomputeBoard(s.game.buffer, s.game.config.width)) board$;
   @select((s) => s.game.lastEvent) lastEvent$;
   @select((s) => s.game.isPaused) isPaused$;
+  @select((s) => s.game.score) score$;
+  @select((s) => s.game.level) level$;
   private boardWidth$: number;
   private deRegister: Function[] = [];
   private pause: Function;
-  private pauseLabel = 'Pause';
+  private done: Function;
+  private pauseLabel = 'PAUSE';
   private preview: { name: string, cols: number[][]}[] = [];
   private resume: Function;
-  private resumeLabel = 'Resume';
+  private resumeLabel = 'RESUME';
   private styles = {};
 
   constructor(@Inject(Store) private store: EngineStore,
@@ -77,6 +83,7 @@ export class Game implements AfterViewInit, OnInit, OnDestroy {
               private cdRef: ChangeDetectorRef) {
     this.pause = this.store.game.pause;
     this.resume = this.store.game.resume;
+    this.done = this.store.game.stop;
   }
 
   ngAfterViewInit() {
