@@ -11,12 +11,9 @@
     "removeComments": false,
     "sourceMap": false,
     "inlineSourceMap": true,
-    "jsx": "react"
+    "jsx": "react",
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   },
-  "exclude": [
-    "coverage",
-    "dist",
-    "lib",
-    "node_modules"
-  ]
+  "exclude": ["coverage", "dist", "lib", "node_modules"]
 }

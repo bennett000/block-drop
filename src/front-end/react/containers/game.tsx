@@ -3,96 +3,83 @@ import { connect } from 'react-redux';
 import { keyPress } from '../../actions/events.actions';
 import { registerKeyControls } from '../../controls';
 import { boardToArray } from '../../../util';
-import {
-  gameViewportClass,
-  previewDebug,
-} from '../../styles';
-import {
-  Board,
-  Button,
-  Debug,
-  NextPieces,
-} from '../components';
-
+import { Board, Button, Score, NextPieces } from '../components';
 
 function mapStateToProps(state) {
   return {
     activePiece: state.game.activePiece,
     board: boardToArray(state.game.buffer, state.game.config.width),
+    level: state.game.level,
+    score: state.game.score,
     lastEvent: state.game.lastEvent,
     isPaused: state.game.isPaused,
     preview: state.game.preview,
-    styles: {
-      flexDirection: state.game.currentGameViewportDimensions.direction,
-    },
-    subStyles: {
-      minWidth: state.game.currentGameViewportDimensions.x + 'px',
-      minHeight: state.game.currentGameViewportDimensions.y + 'px',
-      maxWidth: state.game.currentGameViewportDimensions.x + 'px',
-      maxHeight: state.game.currentGameViewportDimensions.y + 'px',
-    },
     width: state.game.config.width,
   };
 }
 
-function mapDispatchToProps(dispatch)  {
+function mapDispatchToProps(dispatch) {
   return {
-    keyPress: (event) => dispatch(keyPress(event)),
+    keyPress: event => dispatch(keyPress(event)),
   };
 }
 
-export const Game = connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(React.createClass({
-  deRegister: [],
-  componentDidMount: function() {
-    this.props.resizer.resize();
-    this.deRegister.push(this.props.resizer.bind());
+export const Game = connect(mapStateToProps, mapDispatchToProps)(
+  React.createClass({
+    deRegister: [],
+    componentDidMount: function() {
+      this.props.resizer.resize();
+      this.deRegister.push(this.props.resizer.bind());
 
-    const controls = this.props.store.game.controls();
+      const controls = this.props.store.game.controls();
 
-    this.deRegister.push(registerKeyControls({
-      37: controls.moveLeft,
-      38: controls.moveUp,
-      39: controls.moveRight,
-      40: controls.moveDown,
-      81: controls.rotateLeft,
-      87: controls.rotateRight,
-    }, this.props.keyPress));
-  },
+      this.deRegister.push(
+        registerKeyControls(
+          {
+            37: controls.moveLeft,
+            38: controls.moveUp,
+            39: controls.moveRight,
+            40: controls.moveDown,
+            81: controls.rotateLeft,
+            87: controls.rotateRight,
+          },
+          this.props.keyPress,
+        ),
+      );
+    },
 
-  componentWillUnmount: function () {
-    this.deRegister.forEach((unsubscribe) => unsubscribe());
-    this.deRegister = [];
-  },
+    componentWillUnmount: function() {
+      this.deRegister.forEach(unsubscribe => unsubscribe());
+      this.deRegister = [];
+    },
 
-  render() {
-    const { pause, resume } = this.props.store.game;
-    return (<div className={ gameViewportClass } style={ this.props.styles }>
-      {
-        this.props.isPaused ?
-          null :
-          <Board board={ this.props.board }
-                 width={ this.props.width }
-                 styles={ this.props.subStyles } />
-      }
-      <div className={ previewDebug }>
-        <div>
-        {
-          this.props.isPaused ?
-            <Button value='Resume' onClick={ resume } /> :
-            <Button value='Pause' onClick={ pause } />
-        }
+    render() {
+      const { stop, pause, resume } = this.props.store.game;
+      return (
+        <div className='flex pa2 pa4-ns flex-auto'>
+          {this.props.isPaused ? null : (
+            <Board
+              board={this.props.board}
+              level={this.props.level}
+              width={this.props.width}
+            />
+          )}
+          <div className='w-third'>
+            <Score score={this.props.score} />
+            {this.props.isPaused ? null : (
+              <NextPieces preview={this.props.preview} />
+            )}
+            <div className='flex flex-wrap justify-between man1 man2-ns'>
+              {this.props.isPaused ? (
+                <div className="flex-auto ma1 ma2-ns"><Button value='Resume' onClick={resume}/></div>
+              ) : (
+                <div className="flex-auto ma1 ma2-ns"><Button value='Pause' onClick={pause} className="flex-auto ma1 ma2-ns"/></div>
+              )}
+                <div className="flex-auto ma1 ma2-ns"><Button value='Done' onClick={stop} className="flex-auto ma1 ma2-ns"/></div>
+            </div>
+          </div>
         </div>
-        {
-          this.props.isPaused ?
-            null :
-            <NextPieces preview={ this.props.preview }/>
-        }
-        <Debug activePiece={ this.props.activePiece }
-               lastEvent={ this.props.lastEvent } />
-      </div>
-    </div>);
-  },
-}));
+      );
+    },
+  }),
+);

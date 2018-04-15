@@ -2,11 +2,7 @@
  * Stateful body re-sizer to preserve board aspect ratio
  */
 import { viewportResize } from './actions/events.actions';
-import {
-  computeAspectRatioDimensions,
-  throttle,
-} from '../util';
-import { verticalUiClass } from './styles';
+import { computeAspectRatioDimensions, throttle } from '../util';
 import { FRAMEWORK_DESCRIPTIONS } from './constants';
 /**
  *
@@ -37,7 +33,6 @@ export interface Resizer {
 let lastContainer;
 let lastWidth = 0;
 let lastHeight = 0;
-
 
 export function init(store): Resizer {
   const throttledResize = throttle<() => void>(30, resize);
@@ -74,17 +69,8 @@ export function init(store): Resizer {
     const containerId = FRAMEWORK_DESCRIPTIONS[currentFw].id;
 
     let elAppContainer;
-    let verticalUiSize;
 
-
-    const verticalUi = document.getElementsByClassName(verticalUiClass);
-    verticalUiSize = Array.prototype.reduce
-      .call(verticalUi, (count, el) => {
-        count += el.offsetHeight;
-        return count;
-      }, 0);
-
-    if (lastContainer && (lastContainer.id === containerId)) {
+    if (lastContainer && lastContainer.id === containerId) {
       elAppContainer = lastContainer;
     } else {
       elAppContainer = document.getElementById(containerId);
@@ -98,14 +84,14 @@ export function init(store): Resizer {
       window.innerWidth,
       document.body.offsetWidth,
       document.documentElement.clientWidth,
-      document.documentElement.offsetWidth
+      document.documentElement.offsetWidth,
     );
     const viewY = Math.max(
-        window.innerHeight,
-        document.body.offsetHeight,
-        document.documentElement.clientHeight,
-        document.documentElement.offsetHeight
-      );
+      window.innerHeight,
+      document.body.offsetHeight,
+      document.documentElement.clientHeight,
+      document.documentElement.offsetHeight,
+    );
 
     const gameX = gameState.config.width - Math.abs(gameState.trimCols);
     const gameY = gameState.config.height - Math.abs(gameState.trimRows);
@@ -169,6 +155,3 @@ export function init(store): Resizer {
     resize,
   };
 }
-
-
-

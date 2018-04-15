@@ -1,7 +1,4 @@
-import {
-  emptyTile,
-  tileByNumber,
-} from '../../styles';
+import { emptyTile, tileByNumber } from '../../styles';
 
 export const Tile = () => ({
   computed: {
@@ -15,5 +12,5 @@ export const Tile = () => ({
       required: true,
     },
   },
-  template: `<div v-bind:class="tile">{{ value }}</div>`,
+  template: `<div v-bind:class="tile"></div>`,
 });

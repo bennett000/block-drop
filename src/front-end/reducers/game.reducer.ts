@@ -1,18 +1,10 @@
-import {
-  Block,
-} from '../../interfaces';
+import { Block } from '../../interfaces';
 
-import {
-  GameConfig,
-} from '../../interfaces';
+import { GameConfigOptions } from '../../interfaces';
 
-import {
-  deepFreeze,
-} from '../../util';
+import { deepFreeze } from '../../util';
 
-import {
-  DEFAULT_CONFIG_1,
-} from '../../engine/configs/default-config';
+import { DEFAULT_CONFIG_1 } from '../../engine/configs/default-config';
 
 import {
   EVENT_KEYPRESS,
@@ -23,6 +15,11 @@ import {
   UPDATE_ACTIVE_PIECE,
   UPDATE_PREVIEW,
   UPDATE_BUFFER,
+  UPDATE_LEVEL,
+  UPDATE_SCORE,
+  UPDATE_LEVEL_PROGRESS,
+  UPDATE_GAME_STATUS,
+  UPDATE_SCORE_DATA,
 } from '../constants';
 import { O_EMPTY_BLOCK } from '../constants';
 import { mergeProp, partial } from '../../util';
@@ -35,13 +32,21 @@ import { mergeProp, partial } from '../../util';
 export interface IGameState {
   activePiece: Block;
   buffer: Uint8Array;
-  config: GameConfig;
+  config: GameConfigOptions;
   currentGameViewportDimensions: {
-    x: number, y: number, direction: 'row' | 'column'
+    x: number;
+    y: number;
+    direction: 'row' | 'column';
   };
   isPaused: boolean;
+  isStopped: boolean;
   lastEvent: { keyCode: number };
+  level: number;
+  levelProgress: number;
   preview: Block[];
+  score: number;
+  lastLevelScore: number;
+  lastClearScore: number;
   trimCols: number;
   trimRows: number;
 }
@@ -52,10 +57,16 @@ const INIT: IGameState = deepFreeze({
   config: Object.assign({}, DEFAULT_CONFIG_1, {
     debug: true,
   }),
-  currentGameViewportDimensions: { x: 0, y: 0, direction: 'row' },
+  currentGameViewportDimensions: { x: 0, y: 0, direction: 'row' as 'row' },
   isPaused: false,
+  isStopped: false,
   lastEvent: { keyCode: 0 },
+  lastLevelScore: 0,
+  lastClearScore: 0,
+  level: 0,
+  levelProgress: 0,
   preview: [],
+  score: 0,
   trimCols: 2,
   trimRows: 0,
 });
@@ -87,6 +98,27 @@ export function game(state = INIT, { payload, type }) {
 
     case UPDATE_PREVIEW:
       return bMergeProp('preview');
+
+    case UPDATE_SCORE:
+      return bMergeProp('score');
+
+    case UPDATE_LEVEL:
+      return bMergeProp('level');
+
+    case UPDATE_LEVEL_PROGRESS:
+      return bMergeProp('levelProgress');
+
+    case UPDATE_GAME_STATUS:
+      return bMergeProp('isStopped');
+
+    case UPDATE_SCORE_DATA:
+      return {
+        ...state,
+        lastLevelScore: payload.levelScore,
+        lastClearScore: payload.clearScore,
+        lastOverflowBonus: payload.overflowBonus,
+        lastFwBonus: payload.fwBonus,
+      };
 
     default:
       return state;

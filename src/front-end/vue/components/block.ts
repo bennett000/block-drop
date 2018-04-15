@@ -1,5 +1,5 @@
 import { Tile } from './tile';
-import { flexGrowRow, tileByNumber, flexGrowCol } from '../../styles';
+import { flexGrowRow, flexGrowCol } from '../../styles';
 import { columnsFromBlock } from '../../../engine/block';
 
 export const Block = () => ({
@@ -18,10 +18,10 @@ export const Block = () => ({
     },
   },
   template: `
-  <div class="${ flexGrowCol }">
+  <div class="${flexGrowCol}">
     {{ block.name }}
     <div 
-      class="${ flexGrowRow }" 
+      class="${flexGrowRow}" 
       v-for="(row, i) in cols" 
       v-bind:key="i"
       >

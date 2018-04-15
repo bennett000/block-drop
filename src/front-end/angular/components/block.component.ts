@@ -1,13 +1,6 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  Input,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
-import {
-  flexGrowRow,
-  tileByNumber,
-} from '../../styles';
+import { flexGrowRow, tileByNumber } from '../../styles';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -15,8 +8,10 @@ import {
   template: `
     {{ name }}
     <div class="${flexGrowRow}" *ngFor="let row of cols; trackBy: trackCol">
-      <tile [ngClass]="tile === 0 ? emptyTile : tileByNumber(tile)"
-       *ngFor="let tile of row; trackBy: trackRow" [value]="tile"></tile>
+      <tile
+        *ngFor="let tile of row; trackBy: trackRow"
+        [value]="tile"
+      ></tile>
     </div>
 `,
 })
@@ -33,7 +28,7 @@ export class Block {
     return index;
   }
 
-  trackRow(index: number, value: number) {
+  trackRow(_, value: number) {
     return value;
   }
 }

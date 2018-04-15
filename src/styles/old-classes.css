@@ -1,0 +1,170 @@
+/* DEPRECATED. Styles from original POC. */
+
+.bd-padding-5 {
+  padding: 5%;
+}
+
+.bd-flex {
+  display: flex;
+}
+
+.bd-flex-row {
+  flex-direction: row;
+}
+
+.bd-flex-col {
+  flex-direction: column;
+}
+
+.bd-flex-justify-around {
+  justify-content: space-around;
+}
+
+.bd-flex-0-1-auto {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.bd-flex-1-9-auto {
+  min-height: 0;
+  flex: 1 9 auto;
+}
+
+.bd-flex-1-1-auto {
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.bd-flex-3-1-auto {
+  min-height: 0;
+  flex: 3 1 auto;
+}
+
+.bd-flex-nowrap {
+  flex-wrap: nowrap;
+}
+
+.bd-border {
+  border-style: solid;
+  border-width: 1px;
+}
+
+.bd-border-black {
+  border-color: black;
+}
+
+.bd-border-white {
+  border-color: white;
+}
+
+.bd-border-green {
+  border-color: darkgreen;
+}
+
+.bd-border-red {
+  border-color: darkred;
+}
+
+.bd-border-blue {
+  border-color: darkblue;
+}
+
+.bd-margin-bottom {
+  margin-bottom: 5px;
+}
+
+.bd-margin-left {
+  margin-left: 5px;
+}
+
+.bd-mono-font {
+  font-family: 'Courier New', Courier, 'Lucida Sans Typewriter',
+    'Lucida Typewriter', monospace;
+}
+
+.bd-black {
+  color: black;
+}
+
+.bd-green {
+  color: darkgreen;
+}
+
+.bd-red {
+  color: darkred;
+}
+
+.bd-blue {
+  color: darkblue;
+}
+
+.bd-bg-green {
+  background-color: forestgreen;
+}
+
+.bd-bg-red {
+  background-color: indianred;
+}
+
+.bd-bg-blue {
+  background-color: cornflowerblue;
+}
+
+.bd-shadow {
+  color: #aaaaaa;
+}
+
+.bd-bg-border-shadow {
+  border-color: #aaaaaa;
+  border-style: dashed;
+}
+
+.bd-bg-shadow-green {
+  background-color: rgba(34, 139, 34, 0.15);
+}
+
+.bd-bg-shadow-red {
+  background-color: rgba(205, 92, 92, 0.15);
+}
+
+.bd-bg-shadow-blue {
+  background-color: rgba(100, 149, 237, 0.15);
+}
+
+.bd-bg-gone-green {
+  background-color: rgba(34, 200, 34, 1);
+}
+
+.bd-bg-gone-red {
+  background-color: rgba(205, 142, 142, 1);
+}
+
+.bd-bg-gone-blue {
+  background-color: rgba(120, 169, 237, 1);
+}
+
+.bd-bg-gone-animation {
+  visibility: hidden;
+  opacity: 0;
+  transition: background-color 1.5s, visibility 0s 1.5s, opacity 1.5s linear;
+}
+
+/** Dimension Specific stuff */
+
+@media screen and (orientation: portrait) {
+  .bd-flex-col-if-portrait {
+    flex-direction: column;
+  }
+  .bd-flex-row-if-portrait {
+    flex-direction: row;
+  }
+}
+
+@media screen and (orientation: landscape) {
+  .bd-flex-col-if-portrait {
+    flex-direction: row;
+  }
+  .bd-flex-row-if-portrait {
+    flex-direction: column;
+  }
+}

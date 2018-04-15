@@ -1,9 +1,6 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
-import { Button } from '../components';
-import { partial } from '../../../util';
-import { verticalUiClass } from '../../styles';
 
 function mapStateToProps(state, ownProps) {
   return {
@@ -13,32 +10,22 @@ function mapStateToProps(state, ownProps) {
   };
 }
 
-function mapDispatchToProps(dispatch)  {
+function mapDispatchToProps() {
   return {};
 }
 
-export const App = withRouter(connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(React.createClass({
-  render() {
-    return (<div>
-      <div className={ verticalUiClass }>
-        {
-          this.props.routes
-            .map((route, i) => (<Button key = {i}
-                                        value={ route.name }
-                                        onClick={
-                            partial(() => this.props.router.push(route.path),
-                            route.id)
-                          }/>))
-
-        }
-      </div>
-      <div>
-        { this.props.children }
-      </div>
-    </div>);
-  },
-})));
-
+export const App = withRouter(
+  connect(mapStateToProps, mapDispatchToProps)(
+    React.createClass({
+      render() {
+        return (
+          <div className='flex flex-auto flex-column'>
+            <hr
+              className='ma0 bn shadow-react-blue bg-react-blue h0-25 h0-5-l' />
+            {this.props.children}
+          </div>
+        );
+      },
+    }),
+  ),
+);

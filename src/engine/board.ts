@@ -1,33 +1,91 @@
 /**
  * Describes the game board and its actions
  */
-import {
-  forEach,
-  rotateLeft,
-  rotateRight,
-} from './block';
+import { forEach, rotateLeft, rotateRight } from './block';
 
 import { makeCollection } from './function-collection';
 
-import {
-  Block,
-  Board,
-  Board1,
-} from '../interfaces';
+import { Block, Board, Board1 } from '../interfaces';
 
-import {
-  throwOutOfBounds,
-} from '../util';
+import { throwOutOfBounds } from '../util';
 
-export const functionsDetectClear = makeCollection({
-  detectAndClear1,
-  detectAndClear2,
-}, detectAndClear1);
+export const SHADOW_OFFSET = 9;
+export const DC2MAX = 9;
 
-export function addBlock(board: Board,
-                         block: Block,
-                         buffer: Uint8Array = board.desc) {
-  forEach(block, (el, x, y, i, j) => {
+export default {
+  canMoveDown: makeCollection<(board: Board, block: Block) => boolean>(
+    {
+      canMoveDown1: canMoveDown,
+    },
+    canMoveDown,
+  ),
+  canMoveLeft: makeCollection<(board: Board, block: Block) => boolean>(
+    {
+      canMoveLeft1: canMoveLeft,
+    },
+    canMoveLeft,
+  ),
+  canMoveRight: makeCollection<(board: Board, block: Block) => boolean>(
+    {
+      canMoveRight1: canMoveRight,
+    },
+    canMoveRight,
+  ),
+  canMoveUp: makeCollection<(board: Board, block: Block) => boolean>(
+    {
+      canMoveUp1: canMoveUp,
+    },
+    canMoveUp,
+  ),
+  canRotateLeft: makeCollection<(board: Board, block: Block) => boolean>(
+    {
+      canRotateLeft1: canRotateLeft1,
+    },
+    canRotateLeft1,
+  ),
+  canRotateRight: makeCollection<(board: Board, block: Block) => boolean>(
+    {
+      canRotateRight1: canRotateRight1,
+    },
+    canRotateRight1,
+  ),
+  createBoard: makeCollection<(x: number, y: number) => Board>(
+    {
+      createBoard1,
+    },
+    createBoard1,
+  ),
+  detectAndClear: makeCollection<(board: Board) => { total: number }>(
+    {
+      detectAndClear1,
+      detectAndClear2,
+    },
+    detectAndClear1,
+  ),
+};
+
+export function addBlock(
+  board: Board,
+  block: Block,
+  buffer: Uint8Array = board.desc,
+  addShadow: boolean = false,
+) {
+  if (addShadow) {
+    forEach(block, (_, x, y, i, j) => {
+      const index = indexFromPoint(board.width, x, y);
+      if (block.desc[i][j] === 0) {
+        return;
+      }
+      buffer[index] = block.desc[i][j] + SHADOW_OFFSET;
+    });
+    gravityDrop({
+      desc: buffer,
+      width: board.width,
+      height: board.height,
+    });
+  }
+
+  forEach(block, (_, x, y, i, j) => {
     const index = indexFromPoint(board.width, x, y);
     if (block.desc[i][j] === 0) {
       return;
@@ -37,7 +95,7 @@ export function addBlock(board: Board,
 }
 
 export function canMoveDown(board: Board, block: Block): boolean {
-  const newY =  block.y + 1; 
+  const newY = block.y + 1;
   const bottomEdge = newY + block.height - block.centreY;
   if (bottomEdge > board.height) {
     return false;
@@ -46,7 +104,7 @@ export function canMoveDown(board: Board, block: Block): boolean {
 }
 
 export function canMoveUp(board: Board, block: Block): boolean {
-  const newY =  block.y - 1;
+  const newY = block.y - 1;
   const topEdge = newY - block.centreY;
   if (topEdge < 0) {
     return false;
@@ -79,25 +137,25 @@ export function canMoveRight(board: Board, block: Block): boolean {
  */
 export function canRotateEdges(board: Board, block: Block): boolean {
   const rightEdge = block.x + block.width - block.centreX;
-  
+
   if (rightEdge > board.width - 1) {
     return false;
   }
-  
+
   const leftEdge = block.x - block.centreX;
-  
+
   if (leftEdge <= 0) {
     return false;
   }
-  
+
   const bottomEdge = block.y + block.height - block.centreY;
-  
+
   if (bottomEdge > board.height - 1) {
     return false;
   }
-  
+
   const topEdge = block.y - block.centreY;
-  
+
   if (topEdge <= 0) {
     return false;
   }
@@ -109,11 +167,11 @@ export function canRotateLeft1(board: Board, block: Block): boolean {
   if (!canRotateEdges(board, block)) {
     return false;
   }
-  
+
   rotateLeft(block);
   const result = !isOverlapping(board, block, block.x, block.y);
   rotateRight(block);
-  
+
   return result;
 }
 
@@ -121,11 +179,11 @@ export function canRotateRight1(board: Board, block: Block): boolean {
   if (!canRotateEdges(board, block)) {
     return false;
   }
-  
+
   rotateRight(block);
   const result = !isOverlapping(board, block, block.x, block.y);
   rotateLeft(block);
-  
+
   return result;
 }
 
@@ -136,11 +194,11 @@ export function createBoard1(x: number, y: number): Board1 {
   const total = x * y;
   const board = new Uint8Array(total);
   let i;
-  
+
   for (i = 0; i < total; i += 1) {
     board[i] = 0;
   }
-  
+
   return Object.create(null, {
     desc: {
       configurable: true,
@@ -161,33 +219,33 @@ export function createBoard1(x: number, y: number): Board1 {
       configurable: false,
       writable: false,
       value: y,
-    }
+    },
   });
 }
 
 /**
  * Populates `descBuffer` with the new state *and* flips `desc`/`descBuffer`
- * 
- * The new state is calculated by checking for solid rows and omitting them 
- * from * the `nextBoard`.  Rows above the cleared rows are moved down by the 
- * number of * rows immediately below them that have been cleared.  Finally the 
+ *
+ * The new state is calculated by checking for solid rows and omitting them
+ * from * the `nextBoard`.  Rows above the cleared rows are moved down by the
+ * number of * rows immediately below them that have been cleared.  Finally the
  * function * returns the number of rows cleared.
- * 
- * This function is labelled detectAndClear1 because it's conceivable that 
- * alternate algorithms will be considered in the future as well as alternate 
+ *
+ * This function is labelled detectAndClear1 because it's conceivable that
+ * alternate algorithms will be considered in the future as well as alternate
  * rules
  */
-export function detectAndClear1(board: Board1): number {
+export function detectAndClear1(board: Board1): { total: number } {
   let clearedRows = 0;
   let newRowOffset = 0;
   let completeRow = true;
   let rowCounter = 0;
-  
+
   for (let i = board.desc.length - 1; i >= 0; i -= 1) {
     if (board.desc[i] === 0) {
       completeRow = false;
     }
-    
+
     board.descBuffer[i + newRowOffset] = board.desc[i];
 
     rowCounter += 1;
@@ -210,20 +268,21 @@ export function detectAndClear1(board: Board1): number {
   // swap buffer
   [board.desc, board.descBuffer] = [board.descBuffer, board.desc];
 
-  return clearedRows;
+  return { total: clearedRows };
 }
 
-export function detectAndClearTile1(board: Board,
-                                    offset: number,
-                                    adjacents: number[] = [],
-                                    visited: number[] = [],
-                                    value: number = 0,
-                                    skip: 'left' | 'right' |
-                                      'down' | 'up' | 'none' = 'none') {
+export function detectAndClearTile1(
+  board: Board,
+  offset: number,
+  adjacents: number[] = [],
+  visited: number[] = [],
+  value: number = 0,
+  skip: 'left' | 'right' | 'down' | 'up' | 'none' = 'none',
+) {
   throwOutOfBounds(board.desc, offset, 'detectAndClearTile1');
 
   // skip if visited
-  if (visited.indexOf(offset) !== -1) {
+  if (visited.indexOf(offset) >= 0) {
     return adjacents;
   }
 
@@ -231,6 +290,11 @@ export function detectAndClearTile1(board: Board,
 
   // return the existing array if it's empty
   if (board.desc[offset] === 0) {
+    return adjacents;
+  }
+
+  // return the existing array if it is a "non solid"
+  if (board.desc[offset] % 10 !== 0) {
     return adjacents;
   }
 
@@ -249,22 +313,31 @@ export function detectAndClearTile1(board: Board,
     adjacents.push(offset);
   }
 
-  // stop looking on the last tile
-  if (offset + 1 === board.desc.length) {
-    return adjacents;
-  }
-
   // look down if possible
-  if ((offset + board.width) < board.desc.length) {
-    detectAndClearTile1(
-      board, offset + board.width, adjacents, visited, value, 'up');
+  if (offset + board.width < board.desc.length) {
+    if (skip !== 'down') {
+      detectAndClearTile1(
+        board,
+        offset + board.width,
+        adjacents,
+        visited,
+        value,
+        'up',
+      );
+    }
   }
 
   // look up if possilbe
   if (offset >= board.width) {
     if (skip !== 'up') {
       detectAndClearTile1(
-        board, offset - board.width, adjacents, visited, value, 'down');
+        board,
+        offset - board.width,
+        adjacents,
+        visited,
+        value,
+        'down',
+      );
     }
   }
 
@@ -272,12 +345,18 @@ export function detectAndClearTile1(board: Board,
   if (offset % board.width !== 0) {
     if (skip !== 'left') {
       detectAndClearTile1(
-        board, offset - 1, adjacents, visited, value, 'right');
+        board,
+        offset - 1,
+        adjacents,
+        visited,
+        value,
+        'right',
+      );
     }
   }
 
   // if it's the right most tile
-  if (((offset + 1) % board.width) === 0) {
+  if ((offset + 1) % board.width === 0) {
     // if not, we've already looked left and down...
     return adjacents;
   } else {
@@ -291,9 +370,12 @@ export function detectAndClearTile1(board: Board,
 
 export function gravityDropTile(board: Board, offset: number) {
   throwOutOfBounds(board.desc, offset, 'detectAndClearTile1');
+  if (offset < 0) {
+    return;
+  }
 
   // don't drop empty tiles
-  if (board[offset] === 0) {
+  if (board.desc[offset] === 0) {
     return;
   }
 
@@ -325,41 +407,31 @@ export function gravityDrop(board: Board) {
   }
 }
 
-export function detectAndClear2Sweeper(board: Board, max: number) {
-  let clearedTiles = 0;
+export function detectAndClear2(board: Board, max = DC2MAX, markOffset = 0) {
+  let total = 0;
+  const breakdown = [];
 
   for (let i = 0; i < board.desc.length; i += 1) {
     const adjacentTiles = detectAndClearTile1(board, i);
     const len = adjacentTiles.length;
     if (len >= max) {
-      clearedTiles += len;
-      adjacentTiles.forEach((offset) => board.desc[offset] = 0);
+      breakdown.push({
+        fw: board.desc[i],
+        total: len,
+      });
+      total += len;
+      if (markOffset) {
+        adjacentTiles.forEach(offset => (board.desc[offset] += markOffset));
+      } else {
+        adjacentTiles.forEach(offset => (board.desc[offset] = 0));
+      }
     }
   }
 
-  return clearedTiles;
-}
-
-export function detectAndClear2(board: Board, max = 9): number {
-  let total = 0;
-  let current = 1;
-
-  function loop() {
-    let clearedTiles = detectAndClear2Sweeper(board, max);
-    gravityDrop(board);
-    clearedTiles += detectAndClear2Sweeper(board, max);
-
-    return clearedTiles;
-  }
-
-  while (current) {
-    current = loop();
-    if (current) {
-      total += current;
-    }
-  }
-
-  return total;
+  return {
+    total,
+    breakdown,
+  };
 }
 
 export function indexFromPoint(width: number, x: number, y: number): number {
@@ -369,19 +441,21 @@ export function indexFromPoint(width: number, x: number, y: number): number {
 /**
  * Simple test to see if a block's position overlaps other blocks on the board
  */
-export function isOverlapping(board: Board,
-                              block: Block, 
-                              newX: number = block.x,
-                              newY: number = block.y): boolean {
+export function isOverlapping(
+  board: Board,
+  block: Block,
+  newX: number = block.x,
+  newY: number = block.y,
+): boolean {
   let overlaps = false;
-  
+
   for (let j = block.height - 1; j >= 0; j -= 1) {
     if (overlaps) {
       break;
     }
-    
+
     let testY;
-    
+
     if (j < block.centreY) {
       testY = newY - block.centreY + j;
     } else if (j === block.centreY) {
@@ -393,6 +467,10 @@ export function isOverlapping(board: Board,
     for (let i = 0; i < block.width; i += 1) {
       let testX;
 
+      if (block.desc[i][j] === 0) {
+        continue;
+      }
+
       if (i < block.centreX) {
         testX = newX - block.centreX + i;
       } else if (i === block.centreX) {
@@ -403,25 +481,53 @@ export function isOverlapping(board: Board,
 
       const index = indexFromPoint(board.width, testX, testY);
       if (board.desc[index] !== 0) {
-        if (block.desc[i][j] !== 0) {
-          return true;
+        if (board.desc[index] !== 0) {
+          if (board.desc[index] % 10 === 0) {
+            // shortcut for the likely non-zero case
+            return true;
+          }
+          const digits = board.desc[index].toString(10).split('');
+
+          const val = parseInt(digits[digits.length - 1], 10);
+
+          if (val !== SHADOW_OFFSET) {
+            return true;
+          }
         }
       }
     }
   }
-  
+
   return overlaps;
 }
 
-export function removeBlock(board: Board,
-                           block: Block,
-                           buffer: Uint8Array = board.desc) {
-
-  forEach(block, (el, x, y, i, j) => {
+export function removeBlock(
+  board: Board,
+  block: Block,
+  buffer: Uint8Array = board.desc,
+  hasShadow: boolean = false,
+) {
+  forEach(block, (_, x, y, i, j) => {
     const index = indexFromPoint(board.width, x, y);
     if (block.desc[i][j] === 0) {
       return;
     }
     buffer[index] = 0;
   });
+
+  if (hasShadow) {
+    clearShadow(buffer);
+  }
+}
+
+export function clearShadow(buffer: Uint8Array) {
+  for (let i = 0; i < buffer.length; i += 1) {
+    if (
+      buffer[i] === SHADOW_OFFSET + 10 ||
+      buffer[i] === SHADOW_OFFSET + 20 ||
+      buffer[i] === SHADOW_OFFSET + 30
+    ) {
+      buffer[i] = 0;
+    }
+  }
 }

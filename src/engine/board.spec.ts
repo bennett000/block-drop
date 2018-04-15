@@ -1,7 +1,4 @@
-import { 
-  createBlock,
-  rotateRight,
-} from './block';
+import { createBlock } from './block';
 
 import {
   addBlock,
@@ -16,11 +13,11 @@ import {
   detectAndClear1,
   detectAndClearTile1,
   detectAndClear2,
-  gravityDrop,
   gravityDropTile,
   indexFromPoint,
-  isOverlapping, 
+  isOverlapping,
   removeBlock,
+  SHADOW_OFFSET,
 } from './board';
 
 describe('game-board functions', () => {
@@ -32,7 +29,7 @@ describe('game-board functions', () => {
       expect(board.desc[5]).toBe(2);
       expect(board.desc[6]).toBe(3);
     });
-    
+
     it('should add a block to a board, 2x3 holes', () => {
       const board = createBoard1(10, 10);
       addBlock(board, createBlock([[1, 0], [0, 2], [3, 0]], 5, 0));
@@ -51,15 +48,18 @@ describe('game-board functions', () => {
     beforeEach(() => {
       board = createBoard1(10, 10);
     });
-    
-    it('should return false if the bottom of the block is lower than the ' +
-      'height of the board', () => {
-      const block = createBlock([[1, 1, 1]]);
-      block.x = 4;
-      block.y = 8;
-      expect(canMoveDown(board, block)).toBe(false);
-    });   
-    
+
+    it(
+      'should return false if the bottom of the block is lower than the ' +
+        'height of the board',
+      () => {
+        const block = createBlock([[1, 1, 1]]);
+        block.x = 4;
+        block.y = 8;
+        expect(canMoveDown(board, block)).toBe(false);
+      },
+    );
+
     it('should return false if the block will overlap other blocks', () => {
       const block = createBlock([[1, 1, 1]]);
       block.x = 4;
@@ -76,13 +76,12 @@ describe('game-board functions', () => {
       board = createBoard1(10, 10);
     });
 
-    it('should return false if the bottom of the block is lower than zero',
-      () => {
-        const block = createBlock([[1, 1, 1]]);
-        block.x = 4;
-        block.y = 1;
-        expect(canMoveUp(board, block)).toBe(false);
-      });
+    it('should return false if the bottom of the block is lower than zero', () => {
+      const block = createBlock([[1, 1, 1]]);
+      block.x = 4;
+      block.y = 1;
+      expect(canMoveUp(board, block)).toBe(false);
+    });
 
     it('should return false if the block will overlap other blocks', () => {
       const block = createBlock([[1, 1, 1]]);
@@ -100,13 +99,16 @@ describe('game-board functions', () => {
       board = createBoard1(10, 10);
     });
 
-    it('should return false if the left edge is at the left edge of the ' +
-      'board', () => {
-      const block = createBlock([[1], [1], [1]]);
-      block.x = 1;
-      block.y = 5;
-      expect(canMoveLeft(board, block)).toBe(false);
-    });
+    it(
+      'should return false if the left edge is at the left edge of the ' +
+        'board',
+      () => {
+        const block = createBlock([[1], [1], [1]]);
+        block.x = 1;
+        block.y = 5;
+        expect(canMoveLeft(board, block)).toBe(false);
+      },
+    );
 
     it('should return false if the block will overlap other blocks', () => {
       const block = createBlock([[1], [1], [1]]);
@@ -124,13 +126,16 @@ describe('game-board functions', () => {
       board = createBoard1(10, 10);
     });
 
-    it('should return false if the right edge is at the left edge of the ' +
-      'board', () => {
-      const block = createBlock([[1], [1], [1]]);
-      block.x = 8;
-      block.y = 5;
-      expect(canMoveRight(board, block)).toBe(false);
-    });
+    it(
+      'should return false if the right edge is at the left edge of the ' +
+        'board',
+      () => {
+        const block = createBlock([[1], [1], [1]]);
+        block.x = 8;
+        block.y = 5;
+        expect(canMoveRight(board, block)).toBe(false);
+      },
+    );
 
     it('should return false if the block will overlap other blocks', () => {
       const block = createBlock([[1], [1], [1]]);
@@ -147,39 +152,35 @@ describe('game-board functions', () => {
     beforeEach(() => {
       board = createBoard1(10, 10);
     });
-    
-    it('should not be able to rotate something pressed against the left edge',
-      () => {
-        const block = createBlock([[1], [1], [1]]);
-        block.x = 0;
-        block.y = 5;
-        expect(canRotateEdges(board, block)).toBe(false);
-      });
-    
-    it('should not be able to rotate something pressed against the right edge',
-      () => {
-        const block = createBlock([[1], [1], [1]]);
-        block.x = 9;
-        block.y = 5;
-        expect(canRotateEdges(board, block)).toBe(false);
-      });
-    
-    it('should not be able to rotate something pressed against the bottom edge',
-      () => {
-        const block = createBlock([[1], [1], [1]]);
-        block.x = 5;
-        block.y = 9;
-        expect(canRotateEdges(board, block)).toBe(false);
-      });
-    
-    it('should not be able to rotate something pressed against the top edge',
-      () => {
-        const block = createBlock([[1], [1], [1]]);
-        block.x = 5;
-        block.y = 0;
-        expect(canRotateEdges(board, block)).toBe(false);
-      });
-    
+
+    it('should not be able to rotate something pressed against the left edge', () => {
+      const block = createBlock([[1], [1], [1]]);
+      block.x = 0;
+      block.y = 5;
+      expect(canRotateEdges(board, block)).toBe(false);
+    });
+
+    it('should not be able to rotate something pressed against the right edge', () => {
+      const block = createBlock([[1], [1], [1]]);
+      block.x = 9;
+      block.y = 5;
+      expect(canRotateEdges(board, block)).toBe(false);
+    });
+
+    it('should not be able to rotate something pressed against the bottom edge', () => {
+      const block = createBlock([[1], [1], [1]]);
+      block.x = 5;
+      block.y = 9;
+      expect(canRotateEdges(board, block)).toBe(false);
+    });
+
+    it('should not be able to rotate something pressed against the top edge', () => {
+      const block = createBlock([[1], [1], [1]]);
+      block.x = 5;
+      block.y = 0;
+      expect(canRotateEdges(board, block)).toBe(false);
+    });
+
     it('should be able to rotate something that is not on the edges', () => {
       const block = createBlock([[1], [1], [1]]);
       block.x = 5;
@@ -194,7 +195,7 @@ describe('game-board functions', () => {
     beforeEach(() => {
       board = createBoard1(10, 10);
     });
-    
+
     it('should not rotate if it will overlap other tiles: 3x1', () => {
       const block = createBlock([[1], [1], [1]]);
       populateBoard(board);
@@ -226,7 +227,6 @@ describe('game-board functions', () => {
     });
   });
 
-
   describe('createBoard1 function', () => {
     it('should return a board with a desc array that is x * y long', () => {
       expect(createBoard1(5, 5).desc.length).toBe(5 * 5);
@@ -236,43 +236,39 @@ describe('game-board functions', () => {
       expect(createBoard1(5, 5).desc instanceof Uint8Array).toBe(true);
     });
 
-    it('should set the board\'s width', () => {
+    it("should set the board's width", () => {
       expect(createBoard1(5, 7).width).toBe(5);
     });
 
-    it('should set the board\'s height', () => {
+    it("should set the board's height", () => {
       expect(createBoard1(5, 7).height).toBe(7);
     });
 
     it('width property should be immutable', () => {
       const board = createBoard1(5, 7);
-      expect(() => board.width = 44).toThrowError();
+      expect(() => (board.width = 44)).toThrowError();
     });
 
     it('height property should be immutable', () => {
       const board = createBoard1(5, 7);
-      expect(() => board.height = 44).toThrowError();
+      expect(() => (board.height = 44)).toThrowError();
     });
 
     it('desc should be mutable', () => {
       const board = createBoard1(5, 7);
-      expect(() => board.desc = new Uint8Array(1)).not.toThrowError();
+      expect(() => (board.desc = new Uint8Array(1))).not.toThrowError();
     });
 
     it('descBuffer should be mutable', () => {
       const board = createBoard1(5, 7);
-      expect(() => board.descBuffer = new Uint8Array(1)).not.toThrowError();
+      expect(() => (board.descBuffer = new Uint8Array(1))).not.toThrowError();
     });
   });
 
   describe('detectAndClear1 function', () => {
     describe('single bottom row case', () => {
       it('should solve a simple 3x3', () => {
-        const board = Uint8Array.from([
-          0, 1, 0,
-          1, 0, 1,
-          7, 8, 9,
-        ]);
+        const board = Uint8Array.from([0, 1, 0, 1, 0, 1, 7, 8, 9]);
         const next = new Uint8Array(9);
         const result = detectAndClear1({
           width: 3,
@@ -281,21 +277,37 @@ describe('game-board functions', () => {
           descBuffer: next,
         });
 
-        expect(next).toEqual(Uint8Array.from([
-          0, 0, 0,
-          0, 1, 0,
-          1, 0, 1,
-        ]));
-        expect(result).toBe(1);
+        expect(next).toEqual(Uint8Array.from([0, 0, 0, 0, 1, 0, 1, 0, 1]));
+        expect(result.total).toBe(1);
       });
 
       it('should solve a simple 5x5', () => {
         const board = Uint8Array.from([
-          0, 1, 0, 0, 1,
-          1, 0, 1, 2, 3,
-          7, 8, 9, 0, 2,
-          1, 2, 3, 4, 0,
-          5, 1, 2, 3, 4,
+          0,
+          1,
+          0,
+          0,
+          1,
+          1,
+          0,
+          1,
+          2,
+          3,
+          7,
+          8,
+          9,
+          0,
+          2,
+          1,
+          2,
+          3,
+          4,
+          0,
+          5,
+          1,
+          2,
+          3,
+          4,
         ]);
         const next = new Uint8Array(25);
         const result = detectAndClear1({
@@ -305,26 +317,43 @@ describe('game-board functions', () => {
           descBuffer: next,
         });
 
-        expect(next).toEqual(Uint8Array.from([
-          0, 0, 0, 0, 0,
-          0, 1, 0, 0, 1,
-          1, 0, 1, 2, 3,
-          7, 8, 9, 0, 2,
-          1, 2, 3, 4, 0,
-        ]));
+        expect(next).toEqual(
+          Uint8Array.from([
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            1,
+            2,
+            3,
+            7,
+            8,
+            9,
+            0,
+            2,
+            1,
+            2,
+            3,
+            4,
+            0,
+          ]),
+        );
 
-        expect(result).toBe(1);
+        expect(result.total).toBe(1);
       });
     });
 
-
     describe('double bottom row case', () => {
       it('should solve a simple 3x3', () => {
-        const board = Uint8Array.from([
-          0, 1, 0,
-          1, 1, 1,
-          7, 8, 9,
-        ]);
+        const board = Uint8Array.from([0, 1, 0, 1, 1, 1, 7, 8, 9]);
         const next = new Uint8Array(9);
         const result = detectAndClear1({
           width: 3,
@@ -333,21 +362,37 @@ describe('game-board functions', () => {
           descBuffer: next,
         });
 
-        expect(next).toEqual(Uint8Array.from([
-          0, 0, 0,
-          0, 0, 0,
-          0, 1, 0,
-        ]));
-        expect(result).toBe(2);
+        expect(next).toEqual(Uint8Array.from([0, 0, 0, 0, 0, 0, 0, 1, 0]));
+        expect(result.total).toBe(2);
       });
 
       it('should solve a simple 5x5', () => {
         const board = Uint8Array.from([
-          0, 1, 0, 0, 1,
-          1, 0, 1, 2, 3,
-          7, 8, 9, 0, 2,
-          1, 2, 3, 4, 7,
-          5, 1, 2, 3, 4,
+          0,
+          1,
+          0,
+          0,
+          1,
+          1,
+          0,
+          1,
+          2,
+          3,
+          7,
+          8,
+          9,
+          0,
+          2,
+          1,
+          2,
+          3,
+          4,
+          7,
+          5,
+          1,
+          2,
+          3,
+          4,
         ]);
         const next = new Uint8Array(25);
         const result = detectAndClear1({
@@ -357,25 +402,43 @@ describe('game-board functions', () => {
           descBuffer: next,
         });
 
-        expect(next).toEqual(Uint8Array.from([
-          0, 0, 0, 0, 0,
-          0, 0, 0, 0, 0,
-          0, 1, 0, 0, 1,
-          1, 0, 1, 2, 3,
-          7, 8, 9, 0, 2,
-        ]));
+        expect(next).toEqual(
+          Uint8Array.from([
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            0,
+            1,
+            2,
+            3,
+            7,
+            8,
+            9,
+            0,
+            2,
+          ]),
+        );
 
-        expect(result).toBe(2);
+        expect(result.total).toBe(2);
       });
     });
 
     describe('triple row case', () => {
       it('should solve a simple 3x3', () => {
-        const board = Uint8Array.from([
-          1, 1, 1,
-          1, 1, 1,
-          7, 8, 9,
-        ]);
+        const board = Uint8Array.from([1, 1, 1, 1, 1, 1, 7, 8, 9]);
         const next = new Uint8Array(9);
         const result = detectAndClear1({
           width: 3,
@@ -384,21 +447,37 @@ describe('game-board functions', () => {
           descBuffer: next,
         });
 
-        expect(next).toEqual(Uint8Array.from([
-          0, 0, 0,
-          0, 0, 0,
-          0, 0, 0,
-        ]));
-        expect(result).toBe(3);
+        expect(next).toEqual(Uint8Array.from([0, 0, 0, 0, 0, 0, 0, 0, 0]));
+        expect(result.total).toBe(3);
       });
 
       it('should solve a simple 5x5', () => {
         const board = Uint8Array.from([
-          0, 1, 0, 0, 1,
-          1, 1, 1, 2, 3,
-          7, 8, 9, 0, 2,
-          1, 2, 3, 4, 7,
-          5, 1, 2, 3, 4,
+          0,
+          1,
+          0,
+          0,
+          1,
+          1,
+          1,
+          1,
+          2,
+          3,
+          7,
+          8,
+          9,
+          0,
+          2,
+          1,
+          2,
+          3,
+          4,
+          7,
+          5,
+          1,
+          2,
+          3,
+          4,
         ]);
         const next = new Uint8Array(25);
         const result = detectAndClear1({
@@ -408,15 +487,37 @@ describe('game-board functions', () => {
           descBuffer: next,
         });
 
-        expect(next).toEqual(Uint8Array.from([
-          0, 0, 0, 0, 0,
-          0, 0, 0, 0, 0,
-          0, 0, 0, 0, 0,
-          0, 1, 0, 0, 1,
-          7, 8, 9, 0, 2,
-        ]));
+        expect(next).toEqual(
+          Uint8Array.from([
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            7,
+            8,
+            9,
+            0,
+            2,
+          ]),
+        );
 
-        expect(result).toBe(3);
+        expect(result.total).toBe(3);
       });
     });
   });
@@ -437,19 +538,22 @@ describe('game-board functions', () => {
     });
 
     it('should return the given adjacents array if tile at offset is 0', () => {
-      const adj = [ 27 ];
+      const adj = [27];
       const result = detectAndClearTile1(board, 5, adj);
       expect(result).toBe(adj);
-      expect(result).toEqual([ 27 ]);
+      expect(result).toEqual([27]);
     });
 
-    it('should add the given tile to adjacents if tile is non-zero and given ' +
-      'value is zero or omitted', () => {
-      board.desc[5] = 7;
-      const adj = [];
-      detectAndClearTile1(board, 5, adj);
-      expect(adj[0]).toBe(5);
-    });
+    it(
+      'should add the given tile to adjacents if tile is non-zero and given ' +
+        'value is zero or omitted',
+      () => {
+        board.desc[5] = 10;
+        const adj = [];
+        detectAndClearTile1(board, 5, adj);
+        expect(adj[0]).toBe(5);
+      },
+    );
 
     it('should not add a value twice', () => {
       board.desc[5] = 7;
@@ -458,116 +562,143 @@ describe('game-board functions', () => {
       expect(adj.length).toBe(1);
     });
 
-    it('should add the given tile to adjacents if tile\'s value matches ' +
-      'given value', () => {
-      board.desc[5] = 7;
-      const adj = [];
-      detectAndClearTile1(board, 5, adj, [], 7);
-      expect(adj[0]).toBe(5);
-    });
+    it(
+      "should add the given tile to adjacents if tile's value matches " +
+        'given value',
+      () => {
+        board.desc[5] = 10;
+        const adj = [];
+        detectAndClearTile1(board, 5, adj, [], 10);
+        expect(adj[0]).toBe(5);
+      },
+    );
 
     it('should return adjacents if on the last (bottom right) tile', () => {
-      board.desc[99] = 7;
+      board.desc[99] = 10;
       const adj = [];
       detectAndClearTile1(board, 99, adj);
-      expect(adj).toEqual([ 99 ]);
+      expect(adj).toEqual([99]);
     });
 
-    it('should not match the east (right) tile if its value is different',
-      () => {
-        board.desc[5] = 7;
-        board.desc[6] = 6;
-        const adj = [];
-        detectAndClearTile1(board, 5, adj);
-        expect(adj[0]).toBe(5);
-        expect(adj.length).toBe(1);
-    });
-
-    it('should not match the west (left) tile if its value is different',
-      () => {
-        board.desc[5] = 7;
-        board.desc[4] = 6;
-        const adj = [];
-        detectAndClearTile1(board, 5, adj);
-        expect(adj[0]).toBe(5);
-        expect(adj.length).toBe(1);
-      });
-
-    it('should not match the south (bottom) tile if its value is different',
-      () => {
-        board.desc[5] = 7;
-        board.desc[15] = 6;
-        const adj = [];
-        detectAndClearTile1(board, 5, adj);
-        expect(adj[0]).toBe(5);
-        expect(adj.length).toBe(1);
-      });
-
-    it('should match the east (right) tile if its value matches', () => {
-        board.desc[5] = 7;
-        board.desc[6] = 7;
-        const adj = [];
-        detectAndClearTile1(board, 5, adj);
-        expect(adj[0]).toBe(5);
-        expect(adj.length).toBe(2);
-      });
-
-    it('should match the west (left) tile if its value matches', () => {
-        board.desc[5] = 7;
-        board.desc[4] = 7;
-        const adj = [];
-        detectAndClearTile1(board, 5, adj);
-        expect(adj[0]).toBe(5);
-        expect(adj.length).toBe(2);
-      });
-
-    it('should match the south (bottom) tile if its value matches', () => {
-        board.desc[5] = 7;
-        board.desc[15] = 7;
-        const adj = [];
-        detectAndClearTile1(board, 5, adj);
-        expect(adj[0]).toBe(5);
-        expect(adj.length).toBe(2);
-      });
-
-    it('should not match the east (right) tile if it\'s on the east (right) ' +
-      'edge', () => {
-      board.desc[9] = 7;
-      board.desc[10] = 7;
+    it('should not match the east (right) tile if its value is different', () => {
+      board.desc[5] = 10;
+      board.desc[6] = 20;
       const adj = [];
-      detectAndClearTile1(board, 9, adj);
-      expect(adj[0]).toBe(9);
+      detectAndClearTile1(board, 5, adj);
+      expect(adj[0]).toBe(5);
       expect(adj.length).toBe(1);
     });
 
-    it('should not match the west (left) tile if it\'s on the west (left) edge',
+    it('should not match the west (left) tile if its value is different', () => {
+      board.desc[5] = 10;
+      board.desc[4] = 20;
+      const adj = [];
+      detectAndClearTile1(board, 5, adj);
+      expect(adj[0]).toBe(5);
+      expect(adj.length).toBe(1);
+    });
+
+    it('should not match the south (bottom) tile if its value is different', () => {
+      board.desc[5] = 10;
+      board.desc[15] = 20;
+      const adj = [];
+      detectAndClearTile1(board, 5, adj);
+      expect(adj[0]).toBe(5);
+      expect(adj.length).toBe(1);
+    });
+
+    it('should match the east (right) tile if its value matches', () => {
+      board.desc[5] = 10;
+      board.desc[6] = 10;
+      const adj = [];
+      detectAndClearTile1(board, 5, adj);
+      expect(adj[0]).toBe(5);
+      expect(adj.length).toBe(2);
+    });
+
+    it('should match the west (left) tile if its value matches', () => {
+      board.desc[5] = 10;
+      board.desc[4] = 10;
+      const adj = [];
+      detectAndClearTile1(board, 5, adj);
+      expect(adj[0]).toBe(5);
+      expect(adj.length).toBe(2);
+    });
+
+    it('should match the south (bottom) tile if its value matches', () => {
+      board.desc[5] = 10;
+      board.desc[15] = 10;
+      const adj = [];
+      detectAndClearTile1(board, 5, adj);
+      expect(adj[0]).toBe(5);
+      expect(adj.length).toBe(2);
+    });
+
+    it(
+      "should not match the east (right) tile if it's on the east (right) " +
+        'edge',
       () => {
-        board.desc[9] = 7;
-        board.desc[10] = 7;
+        board.desc[9] = 10;
+        board.desc[10] = 10;
         const adj = [];
-        detectAndClearTile1(board, 10, adj);
-        expect(adj[0]).toBe(10);
+        detectAndClearTile1(board, 9, adj);
+        expect(adj[0]).toBe(9);
         expect(adj.length).toBe(1);
-      });
+      },
+    );
+
+    it("should not match the west (left) tile if it's on the west (left) edge", () => {
+      board.desc[9] = 10;
+      board.desc[10] = 10;
+      const adj = [];
+      detectAndClearTile1(board, 10, adj);
+      expect(adj[0]).toBe(10);
+      expect(adj.length).toBe(1);
+    });
 
     it('should not match the east (right) tile if skip is "right"', () => {
-      board.desc[8] = 7;
-      board.desc[9] = 7;
+      board.desc[8] = 10;
+      board.desc[9] = 10;
       const adj = [];
-      detectAndClearTile1(board, 8, adj, [], 7, 'right');
+      detectAndClearTile1(board, 8, adj, [], 10, 'right');
       expect(adj[0]).toBe(8);
       expect(adj.length).toBe(1);
     });
 
     it('should not match the west (left) tile if skip is "left"', () => {
-      board.desc[8] = 7;
-      board.desc[9] = 7;
+      board.desc[8] = 10;
+      board.desc[9] = 10;
       const adj = [];
-      detectAndClearTile1(board, 9, adj, [], 7, 'left');
+      detectAndClearTile1(board, 9, adj, [], 10, 'left');
       expect(adj[0]).toBe(9);
       expect(adj.length).toBe(1);
     });
 
+    it('should not match tiles that are not divisible by 10', () => {
+      board.desc[8] = 7;
+      const adj = [];
+      detectAndClearTile1(board, 9, adj, [], 10, 'left');
+      expect(adj[0]).toBe(undefined);
+      expect(adj.length).toBe(0);
+    });
+
+    it('should match the following case study (1)', () => {
+      board = createBoard1(7, 4);
+      board.desc[5] = 10;
+      board.desc[11] = 10;
+      board.desc[12] = 10;
+      board.desc[15] = 10;
+      board.desc[19] = 10;
+      board.desc[20] = 10;
+      board.desc[21] = 10;
+      board.desc[22] = 10;
+      board.desc[23] = 10;
+      board.desc[24] = 10;
+      board.desc[25] = 10;
+      board.desc[26] = 10;
+      const adj = detectAndClearTile1(board, 5);
+      expect(adj.length).toBe(12);
+    });
   });
 
   describe('detectAndClear2 function', () => {
@@ -578,12 +709,12 @@ describe('game-board functions', () => {
     });
 
     it('should return 0 if given an empty board', () => {
-      expect(detectAndClear2(board)).toBe(0);
+      expect(detectAndClear2(board).total).toBe(0);
     });
 
-    it('should return 41 if given a checkerboard', () => {
+    it('should return 0 if given a checkerboard', () => {
       board = checkerboard();
-      expect(detectAndClear2(board)).toBe(41);
+      expect(detectAndClear2(board).total).toBe(0);
     });
   });
 
@@ -594,29 +725,20 @@ describe('game-board functions', () => {
       board = createBoard1(10, 10);
     });
 
-    it('should do nothing if it\'s in the top row', () => {
+    it("should do nothing if it's in the top row", () => {
       const initBoard = board.desc.slice(0);
 
       gravityDropTile(board, 5);
 
       expect(board.desc).toEqual(initBoard);
     });
-    
+
     it('should execute against the above tile', () => {
       board.desc[5] = 1;
       expect(board.desc[15]).toBe(0);
-      gravityDropTile(board, 15);
+      gravityDropTile(board, 5);
       expect(board.desc[15]).toBe(1);
     });
-  });
-
-  describe('gravityDrop function', () => {
-    let board;
-
-    beforeEach(() => {
-      board = createBoard1(10, 10);
-    });
-
   });
 
   describe('indexFromPoint function', () => {
@@ -665,11 +787,25 @@ describe('game-board functions', () => {
       const block = createBlock([[1, 1, 1]]);
       expect(isOverlapping(board, block, 4, 7)).toBe(false);
     });
-    
+
     it('should not include blank spaces on the object', () => {
       const block = createBlock([[0, 1, 1], [0, 1, 1], [0, 1, 1]]);
 
       expect(isOverlapping(board, block, 5, 1)).toBe(false);
+    });
+
+    it('should treat shadow offsets as zeros', () => {
+      for (let i = 0; i < board.desc.length; i += 1) {
+        if (board.desc[i] === 0) {
+          if (i % 2 === 0) {
+            board.desc[i] = SHADOW_OFFSET + 10;
+          } else {
+            board.desc[i] = SHADOW_OFFSET + 20;
+          }
+        }
+      }
+      const block = createBlock([[1, 1, 1]]);
+      expect(isOverlapping(board, block, 4, 7)).toBe(false);
     });
   });
 
@@ -682,7 +818,7 @@ describe('game-board functions', () => {
       expect(board.desc[5]).toBe(0);
       expect(board.desc[6]).toBe(0);
     });
-    
+
     it('should remove a block to a board, 2x3 holes', () => {
       const board = createBoard1(10, 10);
       addBlock(board, createBlock([[1, 0], [0, 2], [3, 0]], 5, 0));
@@ -719,4 +855,3 @@ function checkerboard() {
   }
   return b;
 }
-

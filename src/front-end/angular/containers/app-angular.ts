@@ -3,30 +3,27 @@ import { Router } from '@angular/router';
 import { NgReduxRouter } from '@angular-redux/router';
 import { NgRedux, select } from '@angular-redux/store';
 import { IState } from '../../reducers/root.reducer.shared';
-import {
-  verticalUiClass,
-} from '../../styles';
 
 @Component({
   selector: 'bd-angular',
+  host: {
+    class: 'flex pa2 pa4-ns flex-auto',
+  },
   template: `
-    <div class="${verticalUiClass}">
-      <bd-button *ngFor="let route of (routes$ | async)"
-         [onClick]="changeScreen(route.path)"
-         [value]="route.name"></bd-button>
-    </div>
     <router-outlet></router-outlet>
 `,
 })
 export class App implements OnDestroy, OnInit {
-  styles = { };
-  @select((s) => s.app.routes) private routes$;
+  styles = {};
+  @select(s => s.app.routes)
+  routes$;
   private unsubscribe: Function;
 
-  constructor(private ngRedux: NgRedux<IState>,
-              private ngReduxRouter: NgReduxRouter,
-              private router: Router) {
-  }
+  constructor(
+    private ngRedux: NgRedux<IState>,
+    private ngReduxRouter: NgReduxRouter,
+    private router: Router,
+  ) {}
 
   ngOnDestroy() {
     this.unsubscribe();
